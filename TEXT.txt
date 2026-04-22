@@ -6,3 +6,14 @@ in retrieval/build_faiss.py line 29
 run clean_data in data_pipeline
 python -m src.retrieval.build_faiss
 python -m notebooks.test
+
+| Step             | File         | Function                          |
+| ---------------- | ------------ | --------------------------------- |
+| Input parsing    | nodes.py     | process_input                     |
+| Retrieval        | nodes.py     | retrieve_recipes                  |
+| Ranking          | nodes.py     | filter_recipes ← YOU UPDATED HERE |
+| Missing analysis | nodes.py     | detect_missing_ingredients        |
+| Generation       | generator.py | generate_response                 |
+
+
+milk sugar butter flour egg vanilla chocolate cream
