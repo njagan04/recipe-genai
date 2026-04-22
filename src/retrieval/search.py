@@ -2,20 +2,20 @@ import json
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from src.config import FAISS_INDEX_PATH, FAISS_META_PATH
 
-INDEX_PATH = "faiss_index/recipes_ivf.index"
-META_PATH = "faiss_index/metadata.json"
+
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 print("Loading FAISS index...")
-index = faiss.read_index(INDEX_PATH)
+index = faiss.read_index(FAISS_INDEX_PATH)
 
 # Important for IVF
 index.nprobe = 10
 
 print("Loading metadata...")
-with open(META_PATH, "r") as f:
+with open(FAISS_META_PATH, "r") as f:
     recipes = json.load(f)
 
 

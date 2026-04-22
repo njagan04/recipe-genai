@@ -3,10 +3,8 @@ import faiss
 import numpy as np
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
+from src.config import DATA_PATH, FAISS_INDEX_PATH, FAISS_META_PATH
 
-DATA_PATH = "data/processed/recipes_cleaned.json"
-INDEX_PATH = "faiss_index/recipes_ivf.index"
-META_PATH = "faiss_index/metadata.json"
 
 # Model
 model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -28,7 +26,7 @@ def main():
         recipes = json.load(f)
 
     # OPTIONAL: reduce size for now
-    # recipes = recipes[:50000]
+    recipes = recipes[:50000]
 
     texts = [create_text(r) for r in recipes]
 
@@ -60,10 +58,10 @@ def main():
     index.nprobe = 10  # controls recall vs speed
 
     print("Saving index...")
-    faiss.write_index(index, INDEX_PATH)
+    faiss.write_index(index, FAISS_INDEX_PATH)
 
     print("Saving metadata...")
-    with open(META_PATH, "w") as f:
+    with open(FAISS_META_PATH, "w") as f:
         json.dump(recipes, f)
 
     print("Done.")
