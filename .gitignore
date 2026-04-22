@@ -2,3 +2,6 @@
 *.zip
 *.csv
 /data/processed/recipes_cleaned.json
+/faiss_index/*
+# /faiss_index/retrieval/
+
