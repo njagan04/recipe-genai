@@ -2,3 +2,9 @@ pandas
 faiss-cpu 
 sentence-transformers 
 tqdm
+langgraph 
+langchain 
+python-dotenv
+transformers 
+torch
+groq

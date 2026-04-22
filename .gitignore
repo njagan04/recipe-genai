@@ -5,3 +5,5 @@
 /faiss_index/*
 # /faiss_index/retrieval/
 
+__pycache__/
+.env

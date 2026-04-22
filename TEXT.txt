@@ -1,2 +1,8 @@
 in clean_data.ipynb cell 5
 in retrieval/build_faiss.py line 29
+
+
+
+run clean_data in data_pipeline
+python -m src.retrieval.build_faiss
+python -m notebooks.test
