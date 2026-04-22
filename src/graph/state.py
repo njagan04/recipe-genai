@@ -2,8 +2,7 @@
 
 from typing import List, Dict, TypedDict
 
-
-class GraphState(TypedDict):
+class GraphState(TypedDict, total=False):
     user_input: str
     ingredients: List[str]
     retrieved_recipes: List[Dict]

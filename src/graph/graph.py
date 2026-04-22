@@ -3,10 +3,12 @@
 from langgraph.graph import StateGraph
 from src.graph.nodes import process_input, retrieve_recipes, filter_recipes, detect_missing_ingredients
 from src.llm.generator import generate_response
+from src.graph.state import GraphState
 
 
 def build_graph():
-    graph = StateGraph(dict)
+
+    graph = StateGraph(GraphState)
 
     graph.add_node("input", process_input)
     graph.add_node("retrieve", retrieve_recipes)
@@ -19,7 +21,6 @@ def build_graph():
     graph.add_edge("input", "retrieve")
     graph.add_edge("retrieve", "filter")
     graph.add_edge("filter", "generate")
-    graph.add_edge("filter", "missing")
     graph.add_edge("missing", "generate")
 
     return graph.compile()

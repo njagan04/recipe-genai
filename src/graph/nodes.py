@@ -1,5 +1,6 @@
-# Collections of steps
-
+# -------------------------------
+# Node 1 — Input Processing
+# -------------------------------
 def process_input(state: dict):
     user_input = state["user_input"]
 
@@ -10,11 +11,13 @@ def process_input(state: dict):
     ]
 
     return {
-        **state,
         "ingredients": ingredients
     }
 
 
+# -------------------------------
+# Node 2 — Retrieval
+# -------------------------------
 from src.retrieval.search import search
 
 
@@ -24,10 +27,13 @@ def retrieve_recipes(state: dict):
     results = search(query, top_k=10)
 
     return {
-        **state,
         "retrieved_recipes": results
     }
 
+
+# -------------------------------
+# Node 3 — Filtering + Ranking
+# -------------------------------
 def filter_recipes(state: dict):
     user_ingredients = set(state["ingredients"])
 
@@ -38,23 +44,25 @@ def filter_recipes(state: dict):
 
         overlap = len(user_ingredients & recipe_ingredients)
 
-        # NEW: weighted score
+        # weighted score (important improvement)
         score = overlap / len(recipe_ingredients)
 
-        if overlap > 0:  # avoid useless recipes
+        if overlap > 0:
             scored.append((score, recipe))
 
-    # sort by score (descending)
+    # sort by best match
     scored.sort(key=lambda x: x[0], reverse=True)
 
-    # take top 5
     filtered = [r for score, r in scored[:5]]
 
     return {
-        **state,
         "filtered_recipes": filtered
     }
 
+
+# -------------------------------
+# Node 4 — Missing Ingredient Detection
+# -------------------------------
 def detect_missing_ingredients(state: dict):
     user_ingredients = set(state["ingredients"])
 
@@ -63,7 +71,7 @@ def detect_missing_ingredients(state: dict):
     for recipe in state["filtered_recipes"]:
         recipe_ingredients = set(recipe["ingredients"])
 
-        missing = list(recipe_ingredients - user_ingredients)
+        missing = [m for m in recipe_ingredients if m not in user_ingredients]
         available = list(recipe_ingredients & user_ingredients)
 
         enriched_recipes.append({
@@ -75,6 +83,5 @@ def detect_missing_ingredients(state: dict):
         })
 
     return {
-        **state,
         "filtered_recipes": enriched_recipes
     }
