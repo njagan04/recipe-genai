@@ -8,3 +8,8 @@ langchain
 python-dotenv
 transformers 
 torch
+streamlit
+langchain-google-genai
+torchvision
+langchain-groq
+groq
