@@ -1,9 +1,11 @@
 .venv
 *.zip
 *.csv
+
 /data/processed/recipes_cleaned.json
-/faiss_index/*
-# /faiss_index/retrieval/
+/faiss_index/*.json
+/faiss_index/*.index
+
 
 __pycache__/
 .env
