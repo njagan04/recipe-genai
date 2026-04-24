@@ -20,7 +20,7 @@ def build_graph():
 
     graph.add_edge("input", "retrieve")
     graph.add_edge("retrieve", "filter")
-    graph.add_edge("filter", "generate")
+    graph.add_edge("filter", "missing")
     graph.add_edge("missing", "generate")
 
     return graph.compile()
