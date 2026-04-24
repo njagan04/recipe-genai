@@ -2,11 +2,16 @@
 *.zip
 *.csv
 
-/data/processed/recipes_cleaned.json
-/faiss_index/*.json
-/faiss_index/*.index
-
+# backend/data/processed/recipes_cleaned.json
+backend/faiss_index/*.json
+backend/faiss_index/*.index
+backend/data/processed/*.json
 
 __pycache__/
 .env
-/model_cache/
+backend/model_cache/
+model_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
