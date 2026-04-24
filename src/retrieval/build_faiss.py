@@ -1,4 +1,5 @@
 import json
+import os
 import faiss
 import numpy as np
 from tqdm import tqdm
@@ -7,7 +8,9 @@ from src.config import DATA_PATH, FAISS_INDEX_PATH, FAISS_META_PATH
 
 
 # Model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+EMBEDDING_MODEL_NAME = "all-mpnet-base-v2"
+MAX_RECIPES = int(os.getenv("MAX_RECIPES", "120000"))
+model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 
 
 def normalize_text(text):
@@ -25,8 +28,9 @@ def main():
     with open(DATA_PATH, "r") as f:
         recipes = json.load(f)
 
-    # OPTIONAL: reduce size for now
-    recipes = recipes[:50000]
+    if MAX_RECIPES > 0:
+        recipes = recipes[:MAX_RECIPES]
+        print(f"Using first {len(recipes)} recipes (MAX_RECIPES={MAX_RECIPES})")
 
     texts = [create_text(r) for r in recipes]
 
@@ -43,7 +47,7 @@ def main():
 
     print("Building IVF index...")
 
-    nlist = 100  # clusters (tune later)
+    nlist = 256  # more clusters for stronger recall on larger corpus
 
     quantizer = faiss.IndexFlatL2(dim)
     index = faiss.IndexIVFFlat(quantizer, dim, nlist)
@@ -55,7 +59,7 @@ def main():
     index.add(embeddings)
 
     # Set search parameter
-    index.nprobe = 10  # controls recall vs speed
+    index.nprobe = 32  # controls recall vs speed
 
     print("Saving index...")
     faiss.write_index(index, FAISS_INDEX_PATH)
@@ -63,6 +67,8 @@ def main():
     print("Saving metadata...")
     with open(FAISS_META_PATH, "w") as f:
         json.dump(recipes, f)
+
+    print(f"Embedding model: {EMBEDDING_MODEL_NAME}")
 
     print("Done.")
 
