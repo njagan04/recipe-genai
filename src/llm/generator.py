@@ -1,86 +1,39 @@
-import os
-from dotenv import load_dotenv
-from groq import Groq
+def _format_recipe_response(recipe: dict) -> str:
+    missing = recipe.get("missing_ingredients", [])
+    available = recipe.get("available_ingredients", [])
+    steps = recipe.get("steps", [])
 
-load_dotenv()
+    if missing:
+        missing_text = "\n".join(f"- {item}" for item in missing)
+    else:
+        missing_text = "No missing ingredients"
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    if available:
+        available_text = ", ".join(available)
+    else:
+        available_text = "None"
+
+    if steps:
+        steps_text = "\n".join(f"{idx + 1}. {step}" for idx, step in enumerate(steps))
+    else:
+        steps_text = "1. No steps available"
+
+    return (
+        f"Recipe: {recipe.get('title', 'Unknown recipe')}\n\n"
+        f"Available ingredients: {available_text}\n\n"
+        f"Missing ingredients:\n{missing_text}\n\n"
+        f"Steps:\n{steps_text}"
+    )
 
 
 def generate_response(state: dict):
     recipes = state.get("filtered_recipes", [])
-    ingredients = state.get("ingredients", [])
 
-    # ---------------------------
-    # Format recipes cleanly
-    # ---------------------------
-    recipe_text = ""
-    for r in recipes:
-        recipe_text += f"""
-                            Recipe: {r['title']}
-                            Available: {r['available_ingredients']}
-                            Missing: {r['missing_ingredients']}
-                            Steps:
-                            {chr(10).join(r['steps'])}
-                            -------------------
-                            """
-
-    # ---------------------------
-    # Strict Prompt (cleaned)
-    # ---------------------------
-    prompt = f"""
-                User ingredients: {ingredients}
-
-                You are given candidate recipes.
-
-                STRICT RULES:
-                - Select ONLY ONE best recipe
-                - Return ONLY ONE recipe
-                - DO NOT list multiple recipes
-                - DO NOT repeat instructions
-                - DO NOT explain anything extra
-                - DO NOT output analysis
-                - DO NOT invent ingredients
-                - ONLY use given data
-
-                Recipes:
-                {recipe_text}
-
-                OUTPUT FORMAT:
-
-                Recipe: <name>
-
-                Missing ingredients:
-                - item1
-                - item2
-                OR
-                No missing ingredients
-
-                Steps:
-                1. ...
-                2. ...
-            """
-
-    # ---------------------------
-    # LLM Call
-    # ---------------------------
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[
-            {"role": "system", "content": "You are a strict cooking assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.2   # lower = more controlled output
-    )
-
-    output = response.choices[0].message.content.strip()
-
-    # ---------------------------
-    # Output Guardrail
-    # ---------------------------
-    if "Recipe:" not in output or "Steps:" not in output:
-        output = "Could not generate proper response. Try again."
+    if not recipes:
+        return {
+            "final_output": "Could not find any matching recipes."
+        }
 
     return {
-        "final_output": output
+        "final_output": _format_recipe_response(recipes[0])
     }
