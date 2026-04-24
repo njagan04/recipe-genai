@@ -82,14 +82,20 @@ def _title_tokens(recipe: dict):
 
 
 # ---------- SEARCH ----------
-def search(query, top_k=10):
-    query = normalize_query(query)
-    query_tokens = _tokenize_query(query)
-    query_set = set(query_tokens)
+def search(query_ingredients, top_k=10):
+    if isinstance(query_ingredients, str):
+        query = normalize_query(query_ingredients)
+        query_set = set(_tokenize_query(query))
+    else:
+        query = " ".join(query_ingredients)
+        query = normalize_query(query)
+        # Preserve multi-word ingredients for exact lexical matching
+        query_set = {normalize_token(ing) for ing in query_ingredients if normalize_token(ing)}
 
     query_vec = model.encode([query]).astype("float32")
 
-    candidate_k = max(top_k * 20, 200)
+    # Increase candidate pool to 10,000 to ensure the lexical reranker catches exact matches
+    candidate_k = min(len(recipes), max(top_k * 200, 10000))
     distances, indices = index.search(query_vec, candidate_k)
 
     seen_titles = set()
