@@ -134,14 +134,7 @@ def _parse_ingredient_list(content: str):
     for item in parsed:
         normalized = _normalize_ingredient(item)
         if normalized:
-            if " " in normalized and normalized not in MULTI_WORD_INGREDIENTS:
-                parts = [part for part in normalized.split() if part]
-                if len(parts) <= 3:
-                    ingredients.extend(parts)
-                else:
-                    ingredients.append(normalized)
-            else:
-                ingredients.append(normalized)
+            ingredients.append(normalized)
 
     ingredients = list(dict.fromkeys(ingredients))
 
@@ -167,14 +160,7 @@ def _extract_candidates_from_text(user_input: str):
         if not candidate:
             continue
 
-        if " " in candidate and candidate not in MULTI_WORD_INGREDIENTS:
-            parts = [part for part in candidate.split() if part]
-            if len(parts) <= 3:
-                candidates.extend(parts)
-            else:
-                candidates.append(candidate)
-        else:
-            candidates.append(candidate)
+        candidates.append(candidate)
 
     return list(dict.fromkeys(candidates))
 
@@ -213,10 +199,8 @@ from src.retrieval.search import search
 
 
 def retrieve_recipes(state: dict):
-    query = " ".join(state["ingredients"])
-
-    # Pull a wider candidate set so ranking has enough options.
-    results = search(query, top_k=50)
+    # Pass the raw list of ingredients so the search function preserves multi-word phrases
+    results = search(state["ingredients"], top_k=50)
 
     return {
         "retrieved_recipes": results
@@ -299,10 +283,18 @@ def filter_recipes(state: dict):
         "filtered_recipes": filtered
     }
 
+# Node 4 — LLM Reranking
 
-# Node 4 — Missing Ingredient Detection
+from src.llm.generator import rerank_recipes_with_llm
 
-def detect_missing_ingredients(state: dict):
-    return {
-        "filtered_recipes": state["filtered_recipes"]
-    }
+def rerank_recipes(state: dict):
+    filtered = state.get("filtered_recipes", [])
+    if len(filtered) <= 1:
+        return {"filtered_recipes": filtered}
+        
+    user_ingredients = state.get("ingredients", [])
+    reranked = rerank_recipes_with_llm(user_ingredients, filtered)
+    
+    return {"filtered_recipes": reranked}
+
+
