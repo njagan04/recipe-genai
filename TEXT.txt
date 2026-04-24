@@ -15,5 +15,6 @@ python -m notebooks.test
 | Missing analysis | nodes.py     | detect_missing_ingredients        |
 | Generation       | generator.py | generate_response                 |
 
-
-milk sugar butter flour egg vanilla chocolate cream
+Run clean_data.ipynb (to generate the cleaned data).
+Run python -m src.retrieval.build_faiss (to build the vector index).
+Run streamlit run streamlit_app.py (to launch the app).
