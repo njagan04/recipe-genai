@@ -1,1 +1,5 @@
-Data set from https://www.kaggle.com/datasets/paultimothymooney/recipenlg
+This directory stores the raw, unprocessed datasets downloaded from source.
+
+Because raw datasets can be massive, `.csv` and `.zip` files in this directory are ignored by git.
+
+Please place the original source data files here before running the data cleaning pipelines.

@@ -1,1 +1,5 @@
-Processed data from the data_pipeline/clean_data notebook as recipes_cleaned.json
+This directory stores the processed and cleaned datasets used by the application, such as `recipes_cleaned.json`.
+
+Because datasets are often very large, the `.json` files in this folder are ignored by git to prevent repository bloat.
+
+To generate these processed files on a fresh clone, you must run the data pipeline notebooks (e.g., `src/data_pipeline/clean_data.ipynb`) against the raw source data.
