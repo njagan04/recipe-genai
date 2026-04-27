@@ -55,19 +55,22 @@ function App() {
         <button className="btn btn-secondary" onClick={() => setSelectedRecipe(null)}>
           ← Back to Search
         </button>
-        <h1 className="recipe-title">{selectedRecipe.title}</h1>
         
-        <h3>Ingredients</h3>
-        <ul>
-          {selectedRecipe.ingredients.map((ing, i) => (
-            <li key={i}>{ing}</li>
-          ))}
-        </ul>
+        <div className="recipe-detail">
+          <h1 className="recipe-title">{selectedRecipe.title}</h1>
+          
+          <h3>Ingredients</h3>
+          <ul>
+            {selectedRecipe.ingredients.map((ing, i) => (
+              <li key={i}>{ing}</li>
+            ))}
+          </ul>
 
-        <h3>Instructions</h3>
-        {selectedRecipe.steps.map((step, i) => (
-          <p key={i}><strong>{i + 1}.</strong> {step}</p>
-        ))}
+          <h3>Instructions</h3>
+          {selectedRecipe.steps.map((step, i) => (
+            <p key={i}><strong>{i + 1}.</strong> {step}</p>
+          ))}
+        </div>
 
         <div className="chat-container">
           <h3>Ask the Chef</h3>
@@ -83,7 +86,7 @@ function App() {
               value={chatInput} 
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleChat()}
-              placeholder="Ask a question..." 
+              placeholder="Ask a question about this recipe..." 
               disabled={loading}
             />
             <button className="btn" onClick={handleChat} disabled={loading}>
@@ -98,7 +101,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="header">
-        <h1>Recipe AI</h1>
+        <h1>Recipe <span>AI</span></h1>
         <p>Discover what you can cook with what you have.</p>
       </div>
 
@@ -115,31 +118,39 @@ function App() {
 
       {searchResults.length > 0 && (
         <div>
-          <h3>Top Matches</h3>
+          <h3 style={{marginBottom: '24px'}}>Top Matches</h3>
           {searchResults.map((recipe, idx) => (
             <div key={idx} className="recipe-card">
               <h2 className="recipe-title">{recipe.title}</h2>
-              <div>
-                <strong>You have: </strong>
-                {recipe.available_ingredients?.map((ing, i) => (
-                  <span key={i} className="ingredient-badge">{ing}</span>
-                ))}
-              </div>
-              {recipe.missing_ingredients?.length > 0 && (
-                <div style={{marginTop: '10px'}}>
-                  <strong>You need: </strong>
-                  {recipe.missing_ingredients.map((ing, i) => (
-                    <span key={i} className="ingredient-badge" style={{background: '#ffebeb', color: '#ff4b4b'}}>{ing}</span>
+              
+              <div className="ingredient-section">
+                <span className="ingredient-label">You have:</span>
+                <div className="badge-container">
+                  {recipe.available_ingredients?.map((ing, i) => (
+                    <span key={i} className="ingredient-badge">{ing}</span>
                   ))}
                 </div>
+              </div>
+
+              {recipe.missing_ingredients?.length > 0 && (
+                <div className="ingredient-section">
+                  <span className="ingredient-label">You need:</span>
+                  <div className="badge-container">
+                    {recipe.missing_ingredients.map((ing, i) => (
+                      <span key={i} className="ingredient-badge missing">{ing}</span>
+                    ))}
+                  </div>
+                </div>
               )}
-              <button 
-                className="btn" 
-                style={{marginTop: '15px'}} 
-                onClick={() => { setSelectedRecipe(recipe); setChatHistory([]); }}
-              >
-                Cook This
-              </button>
+              
+              <div className="cook-btn-wrapper">
+                <button 
+                  className="btn" 
+                  onClick={() => { setSelectedRecipe(recipe); setChatHistory([]); }}
+                >
+                  Cook This Recipe
+                </button>
+              </div>
             </div>
           ))}
         </div>
