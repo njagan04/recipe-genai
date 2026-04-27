@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+
+const capitalize = (text) => text ? text.charAt(0).toUpperCase() + text.slice(1) : ''
 
 function App() {
   const [ingredients, setIngredients] = useState('')
@@ -52,36 +55,60 @@ function App() {
   if (selectedRecipe) {
     return (
       <div className="app-container">
-        <button className="btn btn-secondary" onClick={() => setSelectedRecipe(null)}>
-          ← Back to Search
+        <button className="btn-back" onClick={() => setSelectedRecipe(null)}>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Recipes
         </button>
         
-        <div className="recipe-detail">
-          <h1 className="recipe-title">{selectedRecipe.title}</h1>
-          
-          <h3>Ingredients</h3>
-          <ul>
-            {selectedRecipe.ingredients.map((ing, i) => (
-              <li key={i}>{ing}</li>
-            ))}
-          </ul>
+        <div className="recipe-hero">
+          <h1 className="recipe-title-large">{selectedRecipe.title}</h1>
+        </div>
+        
+        <div className="recipe-content-grid">
+          <div className="ingredients-panel">
+            <h3>Ingredients</h3>
+            <ul className="modern-list">
+              {selectedRecipe.ingredients.map((ing, i) => (
+                <li key={i}>{capitalize(ing)}</li>
+              ))}
+            </ul>
+          </div>
 
-          <h3>Instructions</h3>
-          {selectedRecipe.steps.map((step, i) => (
-            <p key={i}><strong>{i + 1}.</strong> {step}</p>
-          ))}
+          <div className="instructions-panel">
+            <h3>Instructions</h3>
+            <div className="instructions-list">
+              {selectedRecipe.steps.map((step, i) => (
+                <div key={i} className="instruction-step">
+                  <span className="step-number">{i + 1}</span>
+                  <p>{capitalize(step)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="chat-container">
-          <h3>Ask the Chef</h3>
-          {chatHistory.map((msg, i) => (
-            <div key={i} className={`chat-message ${msg.role}`}>
-              <strong>{msg.role === 'user' ? 'You: ' : 'Chef: '}</strong>
-              {msg.content}
-            </div>
-          ))}
+          <div className="chat-header">
+            <h3>Chef's Assistant</h3>
+            <p>Ask anything about this recipe</p>
+          </div>
           
-          <div className="chat-input">
+          <div className="chat-box">
+            {chatHistory.map((msg, i) => (
+              <div key={i} className={`chat-message ${msg.role}`}>
+                <div className="message-sender">{msg.role === 'user' ? 'You' : 'Chef'}</div>
+                <div className="message-content">
+                  {msg.role === 'user' ? (
+                    <p>{msg.content}</p>
+                  ) : (
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="chat-input-wrapper">
             <input 
               value={chatInput} 
               onChange={e => setChatInput(e.target.value)}
@@ -89,7 +116,7 @@ function App() {
               placeholder="Ask a question about this recipe..." 
               disabled={loading}
             />
-            <button className="btn" onClick={handleChat} disabled={loading}>
+            <button onClick={handleChat} disabled={loading}>
               {loading ? '...' : 'Send'}
             </button>
           </div>
@@ -99,60 +126,66 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <div className="header">
-        <h1>Recipe <span>AI</span></h1>
-        <p>Discover what you can cook with what you have.</p>
-      </div>
+    <div className="landing-page">
+      <nav className="navbar">
+        <div className="logo">Recipe<span>AI</span></div>
+      </nav>
 
-      <div className="search-box">
-        <textarea 
-          placeholder="e.g., chicken, rice, garlic, onions" 
-          value={ingredients}
-          onChange={(e) => setIngredients(e.target.value)}
-        />
-        <button className="btn" onClick={handleSearch} disabled={loading}>
-          {loading ? 'Analyzing...' : 'Generate Recipes'}
-        </button>
+      <div className="hero-section">
+        <h1 className="hero-title">Discover what you can cook.</h1>
+        <p className="hero-subtitle">Enter the ingredients you have, and let our AI chef find the perfect recipe for you.</p>
+        
+        <div className="search-widget">
+          <textarea 
+            placeholder="e.g., chicken breast, garlic, olive oil, onions..." 
+            value={ingredients}
+            onChange={(e) => setIngredients(e.target.value)}
+          />
+          <button className="btn-primary-large" onClick={handleSearch} disabled={loading}>
+            {loading ? 'Analyzing Ingredients...' : 'Generate Recipes'}
+          </button>
+        </div>
       </div>
 
       {searchResults.length > 0 && (
-        <div>
-          <h3 style={{marginBottom: '24px'}}>Top Matches</h3>
-          {searchResults.map((recipe, idx) => (
-            <div key={idx} className="recipe-card">
-              <h2 className="recipe-title">{recipe.title}</h2>
-              
-              <div className="ingredient-section">
-                <span className="ingredient-label">You have:</span>
-                <div className="badge-container">
-                  {recipe.available_ingredients?.map((ing, i) => (
-                    <span key={i} className="ingredient-badge">{ing}</span>
-                  ))}
-                </div>
-              </div>
-
-              {recipe.missing_ingredients?.length > 0 && (
-                <div className="ingredient-section">
-                  <span className="ingredient-label">You need:</span>
-                  <div className="badge-container">
-                    {recipe.missing_ingredients.map((ing, i) => (
-                      <span key={i} className="ingredient-badge missing">{ing}</span>
-                    ))}
+        <div className="results-section">
+          <h2 className="section-title">Your Top Matches</h2>
+          <div className="recipes-grid">
+            {searchResults.map((recipe, idx) => (
+              <div key={idx} className="recipe-card">
+                <div className="recipe-card-content">
+                  <h3 className="card-title">{recipe.title}</h3>
+                  
+                  <div className="badge-group">
+                    <span className="badge-label">Available:</span>
+                    <div className="badges">
+                      {recipe.available_ingredients?.map((ing, i) => (
+                        <span key={i} className="badge available">{capitalize(ing)}</span>
+                      ))}
+                    </div>
                   </div>
+
+                  {recipe.missing_ingredients?.length > 0 && (
+                    <div className="badge-group">
+                      <span className="badge-label">Missing:</span>
+                      <div className="badges">
+                        {recipe.missing_ingredients.map((ing, i) => (
+                          <span key={i} className="badge missing">{capitalize(ing)}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              <div className="cook-btn-wrapper">
+                
                 <button 
-                  className="btn" 
+                  className="btn-cook" 
                   onClick={() => { setSelectedRecipe(recipe); setChatHistory([]); }}
                 >
-                  Cook This Recipe
+                  View Full Recipe
                 </button>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
